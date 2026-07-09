@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { COURSES } from '../../data/courses';
+import { useCourses } from '../../hooks/useCourses';
 import { useAttendance } from '../../context/AttendanceContext';
 import { getTodayString, parseDateString, addDays, formatDate, getActiveTimetableForDate, getDayOfWeekId } from '../../utils/dateUtils';
+import { ManageCoursesModal } from './ManageCoursesModal';
 
 const DAYS_OF_WEEK = [
   { id: 'monday', label: 'Monday' },
@@ -15,8 +16,11 @@ const DAYS_OF_WEEK = [
 
 export const TimetableView = ({ selectedDate }) => {
   const { timetables, addTimetable, updateTimetables } = useAttendance();
+  const { courses } = useCourses();
   const today = getTodayString();
-  
+
+  const [isManageCoursesOpen, setIsManageCoursesOpen] = useState(false);
+
   // Initialize selectedWeekDate from prop or today
   const [selectedWeekDate, setSelectedWeekDate] = useState(selectedDate || today);
   // Initialize selectedDayId from selectedWeekDate
@@ -120,13 +124,19 @@ export const TimetableView = ({ selectedDate }) => {
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
       {/* Header with week picker */}
       <div className="flex items-center justify-between">
-        <div>
+      <div>
           <h2 className="text-2xl font-extrabold font-display text-stone-900 tracking-tight">
             Set Up Your Timetable
           </h2>
           <p className="text-sm text-stone-500 mt-1">
             Select which courses you have each day
           </p>
+          <button
+            onClick={() => setIsManageCoursesOpen(true)}
+            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full text-xs font-semibold text-amber-700 hover:bg-amber-100 hover:border-amber-300 transition-all duration-200"
+          >
+            Manage courses →
+          </button>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-stone-700">
@@ -170,43 +180,55 @@ export const TimetableView = ({ selectedDate }) => {
       {/* Courses for selected day */}
       <div className="bg-white border border-stone-200 rounded-2xl p-4 shadow-sm">
         <h3 className="font-bold text-stone-800 mb-3">{selectedDay?.label}</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {COURSES.map((course) => (
+        {courses.length === 0 ? (
+          <div className="text-center py-6">
+            <p className="text-sm text-stone-500 mb-3">No active courses yet.</p>
             <button
-              key={course.id}
-              onClick={() => toggleCourse(course.id)}
-              className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${
-                weeklySchedule[selectedDayId]?.includes(course.id)
-                  ? 'bg-amber-100 border-amber-300 text-amber-900'
-                  : 'bg-white border-stone-200 text-stone-700 hover:border-amber-100'
-              }`}
+              onClick={() => setIsManageCoursesOpen(true)}
+              className="px-4 py-2 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-all duration-200 text-sm"
             >
-              <div className="text-left">
-                <p className="font-semibold text-sm">{course.name}</p>
-                <p className="text-xs text-stone-500">
-                  {course.type === 'theory' ? 'Theory' : 'Lab'}
-                </p>
-              </div>
-              {weeklySchedule[selectedDayId]?.includes(course.id) && (
-                <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-              )}
+              Add your first course
             </button>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {courses.map((course) => (
+              <button
+                key={course.id}
+                onClick={() => toggleCourse(course.id)}
+                className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${
+                  weeklySchedule[selectedDayId]?.includes(course.id)
+                    ? 'bg-amber-100 border-amber-300 text-amber-900'
+                    : 'bg-white border-stone-200 text-stone-700 hover:border-amber-100'
+                }`}
+              >
+                <div className="text-left">
+                  <p className="font-semibold text-sm">{course.name}</p>
+                  <p className="text-xs text-stone-500">
+                    {course.type === 'theory' ? 'Theory' : 'Lab'}
+                  </p>
+                </div>
+                {weeklySchedule[selectedDayId]?.includes(course.id) && (
+                  <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
+                    <svg
+                      className="w-3 h-3 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Apply timetable section */}
@@ -235,6 +257,10 @@ export const TimetableView = ({ selectedDate }) => {
           </button>
         </div>
       </div>
+
+      {isManageCoursesOpen && (
+        <ManageCoursesModal onClose={() => setIsManageCoursesOpen(false)} />
+      )}
     </div>
   );
 };

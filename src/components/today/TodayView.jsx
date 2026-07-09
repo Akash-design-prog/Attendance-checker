@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { COURSES } from '../../data/courses';
+import { useCourses } from '../../hooks/useCourses';
 import { MarkButtons } from './MarkButtons';
 import { CourseQuickAdd } from './CourseQuickAdd';
 
@@ -8,19 +8,20 @@ import { useAttendanceData } from '../../hooks/useAttendanceData';
 
 export const TodayView = ({ setActiveTab, selectedDate, setSelectedDate }) => {
   const { getRecordForDate, markAttendance, timetables } = useAttendanceData();
+  const { courses } = useCourses();
   const [expandedCourseId, setExpandedCourseId] = useState(null);
 
   const hasTimetable = timetables.length > 0;
 
   // Get scheduled courses for selected date
   const scheduledCourseIds = useMemo(() => {
-    if (!hasTimetable) return COURSES.map((c) => c.id);
+    if (!hasTimetable) return courses.map((c) => c.id);
     const activeTimetable = getActiveTimetableForDate(timetables, selectedDate);
-    if (!activeTimetable) return COURSES.map((c) => c.id);
+    if (!activeTimetable) return courses.map((c) => c.id);
     const dayId = getDayOfWeekId(selectedDate);
     const daySchedule = activeTimetable.weeklySchedule[dayId] || [];
-    return daySchedule.length > 0 ? daySchedule : COURSES.map((c) => c.id);
-  }, [timetables, selectedDate, hasTimetable]);
+    return daySchedule.length > 0 ? daySchedule : courses.map((c) => c.id);
+  }, [timetables, selectedDate, hasTimetable, courses]);
 
   const currentRecord = getRecordForDate(selectedDate);
   const loggedCourseIds = Object.keys(currentRecord);
@@ -38,8 +39,8 @@ export const TodayView = ({ setActiveTab, selectedDate, setSelectedDate }) => {
     markAttendance(selectedDate, courseId, status);
   };
 
-  const activeCourses = COURSES.filter(c => loggedCourseIds.includes(c.id) && scheduledCourseIds.includes(c.id));
-  const unmarkedCourses = COURSES.filter(c => !loggedCourseIds.includes(c.id) && scheduledCourseIds.includes(c.id));
+  const activeCourses = courses.filter(c => loggedCourseIds.includes(c.id) && scheduledCourseIds.includes(c.id));
+  const unmarkedCourses = courses.filter(c => !loggedCourseIds.includes(c.id) && scheduledCourseIds.includes(c.id));
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
@@ -123,7 +124,6 @@ export const TodayView = ({ setActiveTab, selectedDate, setSelectedDate }) => {
                     <div className="flex-1 min-w-0" onClick={() => setExpandedCourseId(isExpanded ? null : course.id)}>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-stone-100 text-stone-400">{course.type}</span>
-                        <span className="text-xs text-stone-400 truncate">{course.code}</span>
                       </div>
                       <h4 className="font-semibold text-sm text-stone-700 truncate cursor-pointer hover:text-stone-900">{course.name}</h4>
                     </div>
@@ -162,7 +162,6 @@ export const TodayView = ({ setActiveTab, selectedDate, setSelectedDate }) => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-stone-100 text-stone-400">{course.type}</span>
-                          <span className="text-xs text-stone-400 truncate">{course.code}</span>
                         </div>
                         <h4 className="font-medium text-sm text-stone-500 truncate hover:text-stone-800">{course.name}</h4>
                       </div>

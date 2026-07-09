@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { COURSES } from '../../data/courses';
+import { useCourses } from '../../hooks/useCourses';
 import { SEMESTER_START, SEMESTER_END } from '../../constants/semester';
 import { useCourseStats } from '../../hooks/useCourseStats';
 import { useSemesterProjection } from '../../hooks/useSemesterProjection';
@@ -18,17 +18,20 @@ export const PlannerView = () => {
   // Default to current month if it's in the semester, else first month
   const defaultMonth = allMonths.find(m => m.key === currentMonthKey)?.key || allMonths[0]?.key || 'semester';
 
+  const { courses } = useCourses();
+
   const [selectedMonthKey, setSelectedMonthKey] = useState(defaultMonth);
-  const [selectedCourseId, setSelectedCourseId] = useState(COURSES[0].id);
+  const [selectedCourseId, setSelectedCourseId] = useState(courses[0]?.id ?? null);
 
   const { records } = useAttendanceData();
   const { monthlyStats } = useCourseStats();
   const { remainingWeekdays, remainingWeeks, getProjectedRemainingSessions } = useSemesterProjection(selectedMonthKey);
 
-  const selectedCourse = COURSES.find(c => c.id === selectedCourseId);
+  const selectedCourse = courses.find(c => c.id === selectedCourseId) ?? courses[0] ?? null;
 
   // Pull ONLY this month's records for the selected course
   const monthStats = useMemo(() => {
+    if (!selectedCourse) return { attended: 0, held: 0, percentage: null };
     // Filter records to only those in the selected month
     const monthRecords = {};
     Object.keys(records).forEach(dateStr => {
@@ -36,10 +39,12 @@ export const PlannerView = () => {
         monthRecords[dateStr] = records[dateStr];
       }
     });
-    return calculateCourseStats(monthRecords, selectedCourseId);
-  }, [records, selectedMonthKey, selectedCourseId]);
+    return calculateCourseStats(monthRecords, selectedCourse.id);
+  }, [records, selectedMonthKey, selectedCourse]);
 
-  const remainingSessions = getProjectedRemainingSessions(selectedCourse.weeklyFreq);
+  const remainingSessions = selectedCourse
+    ? getProjectedRemainingSessions(selectedCourse.weeklyFreq)
+    : 0;
   const isSafe = monthStats.percentage === null || monthStats.percentage >= 75;
 
   // Label helper
@@ -49,6 +54,18 @@ export const PlannerView = () => {
 
   // Monthly overall status (from the already computed monthlyStats)
   const monthlyOverall = monthlyStats[selectedMonthKey]?.overallStats?.overallPercentage ?? null;
+
+  if (courses.length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-6">
+        <div className="bg-white border border-dashed border-stone-200 rounded-2xl p-8 text-center">
+          <p className="text-sm text-stone-500 font-medium">
+            No active courses yet. Add a course from the Timetable tab to start planning.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
@@ -107,11 +124,11 @@ export const PlannerView = () => {
           </label>
           <select
             id="course-select-dropdown"
-            value={selectedCourseId}
+            value={selectedCourse?.id ?? ''}
             onChange={(e) => setSelectedCourseId(e.target.value)}
             className="w-full bg-white border border-stone-300 focus:border-amber-500 text-stone-800 px-3 py-2.5 rounded-xl focus:outline-none transition duration-300 font-medium text-sm"
           >
-            {COURSES.map((course) => (
+            {courses.map((course) => (
               <option key={course.id} value={course.id}>
                 {course.name} ({course.type === 'theory' ? 'Theory' : 'Lab'})
               </option>

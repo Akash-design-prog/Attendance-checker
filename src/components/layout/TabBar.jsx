@@ -1,7 +1,7 @@
 import React from 'react';
 import { CalendarDays, LayoutDashboard, Sliders, Clock } from 'lucide-react';
 
-export const TabBar = ({ activeTab, setActiveTab }) => {
+export const TabBar = ({ activeTab, setActiveTab, hasHeader = false }) => {
   const tabs = [
     { id: 'today',     label: 'Today',     icon: CalendarDays },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -10,7 +10,17 @@ export const TabBar = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 sm:sticky sm:top-[68px] bg-[#FAF7F0]/95 sm:bg-[#FAF7F0]/90 border-t sm:border-t-0 sm:border-b border-stone-200 px-4 py-2 sm:py-0 backdrop-blur-md z-30 select-none shadow-sm">
+    <nav
+      className={[
+        // Mobile: fixed bottom tab bar
+        'fixed bottom-0 left-0 right-0 z-30',
+        'bg-[#FAF7F0]/95 border-t border-stone-200 px-4 py-2 backdrop-blur-md select-none shadow-sm',
+        // Desktop: sticky top tab bar — reset mobile fixed/bottom positioning
+        'sm:sticky sm:bottom-auto sm:border-t-0 sm:border-b sm:bg-[#FAF7F0]/90 sm:py-0',
+        // Only offset below header when header is actually rendered (Today tab)
+        hasHeader ? 'sm:top-[68px]' : 'sm:top-0',
+      ].join(' ')}
+    >
       <div className="max-w-4xl mx-auto flex items-center justify-around sm:justify-start sm:gap-1.5 h-14">
         {tabs.map((tab) => {
           const Icon = tab.icon;

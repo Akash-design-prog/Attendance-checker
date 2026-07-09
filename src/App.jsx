@@ -13,7 +13,6 @@ function AppContent() {
   const [selectedDate, setSelectedDate] = useState(getTodayString());
   const { timetables } = useAttendance();
 
-  // Calculate week info for header based on selectedDate
   const effectiveDate = selectedDate;
   const startOfWeek = useMemo(() => {
     const date = parseDateString(effectiveDate);
@@ -25,6 +24,8 @@ function AppContent() {
   const weekStartStr = formatDate(startOfWeek);
   const weekEndStr = formatDate(endOfWeek);
   const hasTimetable = timetables.length > 0;
+
+  const showHeader = activeTab === 'today';
 
   const renderActiveView = () => {
     switch (activeTab) {
@@ -43,17 +44,20 @@ function AppContent() {
 
   return (
     <div className="flex flex-col min-h-screen pb-20 sm:pb-8">
-      {activeTab === 'today' && (
-        <Header 
+      {showHeader && (
+        <Header
           hasTimetable={hasTimetable}
           weekStartStr={weekStartStr}
           weekEndStr={weekEndStr}
           setActiveTab={setActiveTab}
         />
       )}
-      <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
-      
-      <main className="flex-1 w-full max-w-4xl mx-auto py-2">
+      <TabBar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        hasHeader={showHeader}
+      />
+      <main className="flex-1 w-full max-w-4xl mx-auto py-2 sm:py-4">
         {renderActiveView()}
       </main>
     </div>

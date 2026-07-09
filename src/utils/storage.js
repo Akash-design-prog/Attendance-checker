@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'attendance-records';
 const TIMETABLE_KEY = 'attendance-timetables';
+const COURSES_KEY = 'attendance-courses';
 
 export const getRecords = () => {
   try {
@@ -50,5 +51,31 @@ export const clearTimetables = () => {
     localStorage.removeItem(TIMETABLE_KEY);
   } catch (error) {
     console.error('Failed to clear timetables', error);
+  }
+};
+
+export const getCourses = () => {
+  try {
+    const data = localStorage.getItem(COURSES_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Failed to parse courses from storage', error);
+    return null;
+  }
+};
+
+export const saveCourses = (courses) => {
+  try {
+    localStorage.setItem(COURSES_KEY, JSON.stringify(courses));
+  } catch (error) {
+    console.error('Failed to save courses to storage', error);
+  }
+};
+
+export const clearCourses = () => {
+  try {
+    localStorage.removeItem(COURSES_KEY);
+  } catch (error) {
+    console.error('Failed to clear courses', error);
   }
 };
