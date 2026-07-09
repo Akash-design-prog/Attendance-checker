@@ -14,9 +14,6 @@ export const CourseCard = ({ course, stats }) => {
           <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-stone-100 text-stone-500">
             {course.type}
           </span>
-          <span className="text-xs text-stone-400 font-mono group-hover:text-stone-500 transition-colors duration-300">
-            {course.code}
-          </span>
         </div>
 
         {/* Name & Ring */}
