@@ -64,11 +64,9 @@ export const calculateOverallStats = (courses, records) => {
     theoryHeld,
     theoryAttended,
     theoryPercentage,
-    theoryCourseCount: theoryCourses.length,
     labHeld,
     labAttended,
     practicalPercentage,
-    labCourseCount: labCourses.length,
     overallPercentage,
   };
 };

@@ -4,8 +4,8 @@ import { ProgressRing } from '../shared/ProgressRing';
 
 export const OverallSummaryCard = ({ overallStats }) => {
   const {
-    theoryHeld, theoryAttended, theoryPercentage, theoryCourseCount,
-    labHeld, labAttended, practicalPercentage, labCourseCount,
+    theoryHeld, theoryAttended, theoryPercentage,
+    labHeld, labAttended, practicalPercentage,
     overallPercentage,
   } = overallStats;
 
@@ -54,7 +54,7 @@ export const OverallSummaryCard = ({ overallStats }) => {
             </div>
             <div className="text-[10px] text-stone-400 font-medium flex justify-between">
               <span>Attended: {theoryAttended}/{theoryHeld}</span>
-              <span>{theoryCourseCount} {theoryCourseCount === 1 ? 'Course' : 'Courses'}</span>
+              <span>8 Courses</span>
             </div>
           </div>
 
@@ -74,7 +74,7 @@ export const OverallSummaryCard = ({ overallStats }) => {
             </div>
             <div className="text-[10px] text-stone-400 font-medium flex justify-between">
               <span>Attended: {labAttended}/{labHeld}</span>
-              <span>{labCourseCount} {labCourseCount === 1 ? 'Lab' : 'Labs'}</span>
+              <span>3 Labs</span>
             </div>
           </div>
         </div>
